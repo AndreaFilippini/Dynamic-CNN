@@ -88,10 +88,9 @@ class DNET:
             # get the name of the current layer class from which it's derived
             layer_class = i.__class__.__name__
 
-            current_layer = {i.name : [reused_weights, {'class_name' : layer_class}, i.get_config()]}
             section = {}
             replace_flag = False
-
+            
             # if the target matches the searched class or the searched layer name:
             if (target in layer_class or target in i.name):
                 reused_weights = reused
@@ -108,17 +107,18 @@ class DNET:
                 for x in fc_section:
                     section |= {x.name : [reused_weights, {'class_name' : x.__class__.__name__}, x.get_config()]}
 
+            current_layer = {i.name : [reused_weights, {'class_name' : layer_class}, i.get_config()]}
+
             if position == 'before':
                 net_dense |= (section | current_layer)
             elif position == 'after':
-                current_layer[i.name][0] = reused_weights
                 net_dense |= (current_layer | section)
             elif position == 'replace' and replace_flag:
                replace_flag = False
                net_dense |= section
             else:
                net_dense |= current_layer
-      
+        
         return self.model_from_dict(model, net_dense)
 
     def model_from_dict(self, model, model_dict):
@@ -180,7 +180,37 @@ class DNET:
             layer_config['name'] += naming
             new_list += [layer.from_config(layer_config)]
         return new_list
-        
+
+    def get_last_section(self, model, type_class):
+        """
+        method used to find the the name of the first layer of a specific type section
+        """
+   
+        # get the layers of the model and reverse the list
+        layer_list = model.layers
+        layer_list = layer_list[::-1]
+
+        type_name = None
+        type_flag = False
+
+        # iterate over each layer in reverse order
+        for layer in layer_list:
+            layer_class = layer.__class__.__name__
+
+            # if the class searched is the current layer class and
+            # i haven't found yet the beginning of the section
+            if type_class in layer_class and not type_flag:
+                type_flag = True
+            elif type_flag and type_class not in layer_class:
+                # otherwise, if i'm in the section and the current layer type doesn't match,
+                # stop the search, because i reached the end of the section
+                break
+            elif type_flag:
+                # i'm inside the section, save the name of the current layer
+                type_name = layer.name
+
+        return type_name
+               
 if __name__ == '__main__':
 
     # instantiate the class
@@ -202,6 +232,12 @@ if __name__ == '__main__':
     # add a new section after flatten layer made up of a Dense layer, an activation and Dropout
     new_section = [Dense(50), Activation('relu'), Dropout(0.1)]
     model = dynamicNet.insert_section(model, 1, new_section, 'after', 'Flatten')
+    model.summary()
+
+    # add a new convolutional section before the last one
+    new_section = [Conv2D(1024, (2,2), padding="same"), Conv2D(1024, (2,2), padding="same"), MaxPooling2D()]
+    last_conv = dynamicNet.get_last_section(model, 'Conv2D')
+    model = dynamicNet.insert_section(model, 1, new_section, 'before', last_conv)
     model.summary()
 
     # remove a section that starts from 'block5_conv1' with all associated layers in linked_section
