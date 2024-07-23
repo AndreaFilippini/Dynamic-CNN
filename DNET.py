@@ -149,21 +149,21 @@ class DNET:
                 x = model.get_layer(layer['name'])(x)
             else:
                 # otherwise create a new layer based on the configuration of the previously saved one
-                if layer_name in ['Conv2D', 'Conv3D']:
+                if layer_name in ['Conv2D', 'SeparableConv2D', 'Conv2DTranspose']:
                     layer_inst = getattr(module, layer_name)(1, 1)
                 elif layer_name in ['ZeroPadding2D',
                                     'MaxPooling2D',
                                     'AveragePooling2D',
-                                    'GlobalAveragePooling2D',
-                                    'Flatten',
-                                    'BatchNormalization']:
-                    layer_inst = getattr(module, layer_name)()
+                                    'GlobalAveragePooling2D']:
+                    layer_inst = getattr(module, layer_name)((2,2))
                 elif layer_name in ['Dense']:
                     layer_inst = getattr(module, layer_name)(1)
-                elif layer_name in ['Dropout']:
+                elif layer_name in ['Dropout', 'SpatialDropout2D']:
                     layer_inst = getattr(module, layer_name)(0.5)
                 elif layer_name in ['Activation']:
                     layer_inst = getattr(module, layer_name)('relu')
+                elif layer_name in ['Flatten','BatchNormalization', 'ReLU', 'Softmax']:
+                    layer_inst = getattr(module, layer_name)()
 
                 x = layer_inst.from_config(layer)(x)
 
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     model.summary()
 
     # replace all MaxPool layers with BatchNorm and AveragePool
-    new_section = [BatchNormalization(), AveragePooling2D()]
+    new_section = [BatchNormalization(), AveragePooling2D((2,2))]
     model = dynamicNet.insert_section(model, 1, new_section, 'replace', 'MaxPooling2D')
     model.summary()
 
