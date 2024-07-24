@@ -47,7 +47,7 @@ class DNET:
 
                 # if the current layer is not among those connected to
                 # this section, it means that i've reached the end
-                if not layer_class in linked_layers:
+                if layer_class not in linked_layers and i.name not in linked_layers :
                     fc_section = False
                     fc_found = first_found
                     if delimiter:
