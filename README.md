@@ -20,7 +20,7 @@ model = dynamicNet.insert_section(model, 1, new_section, 'after', 'Flatten')
 
 **Add a 'convolutional section' before the last one**
 ```python
-new_section = [Conv2D(1024, (2,2), padding="same"), Conv2D(1024, (2,2), padding="same"), MaxPooling2D()]
+new_section = [Conv2D(1024, (2,2)), Conv2D(1024, (2,2)), MaxPooling2D()]
 last_conv_start = dynamicNet.get_last_section(model, 'Conv2D')
 model = dynamicNet.insert_section(model, 1, new_section, 'before', last_conv_start)
 ```
