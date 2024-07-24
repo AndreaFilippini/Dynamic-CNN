@@ -47,7 +47,7 @@ class DNET:
 
                 # if the current layer is not among those connected to
                 # this section, it means that i've reached the end
-                if layer_class not in linked_layers and i.name not in linked_layers :
+                if layer_class not in linked_layers and i.name not in linked_layers:
                     fc_section = False
                     fc_found = first_found
                     if delimiter:
@@ -62,12 +62,16 @@ class DNET:
 
         print(f"\n#### removed ####\n{removed_name}")
 
-        return self.model_from_dict(model, removed)
+        return self.build_model(model, removed)
 
     def insert_section(self, model, n_section, new_section, position, target):
         """
         method used for inserting a new section of layers
         """
+
+        if not self.all_layers(new_section):
+            print("\n#### New section contains elements that are not layers ####\n")
+            return model
 
         # boolean used to identify which layers in the new architecture can use the old weights
         reused_weights = True
@@ -114,7 +118,17 @@ class DNET:
             else:
                net_dense |= current_layer
         
-        return self.model_from_dict(model, net_dense)
+        return self.build_model(model, net_dense)
+
+    def build_model(self, model, model_dict):
+        """
+        Method used to build the network and handle any problems during its creation
+        """
+        try:
+            return self.model_from_dict(model, model_dict)
+        except:
+            print("\n#### Error during model creation ####\n")
+            return model
 
     def model_from_dict(self, model, model_dict):
         """
@@ -205,7 +219,13 @@ class DNET:
                 type_name = layer.name
 
         return type_name
-               
+
+    def all_layers(self, layer_list):
+        """
+        method used to check if all elements of a list are layers
+        """
+        return all(['keras.layers' in str(type(i)) for i in new_section])
+  
 if __name__ == '__main__':
 
     # instantiate the class
