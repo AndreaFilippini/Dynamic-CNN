@@ -90,7 +90,7 @@ class DNET:
             replace_flag = False
             
             # if the target matches the searched class or the searched layer name:
-            if (target in layer_class or target in i.name):
+            if (layer_class in target or i.name in target):
                 reused_weights = False
                 replace_flag = True
 
@@ -224,7 +224,7 @@ class DNET:
         """
         method used to check if all elements of a list are layers
         """
-        return all(['keras.layers' in str(type(i)) for i in layer_list])
+        return all(['.layers.' in str(type(i)) for i in layer_list])
   
 if __name__ == '__main__':
 
