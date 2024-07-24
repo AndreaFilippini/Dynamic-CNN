@@ -44,7 +44,6 @@ class DNET:
                 # can't use the old weights for subsequent layers, because the size of layers will change
                 reused_weights = False
             elif fc_section:
-
                 # if the current layer is not among those connected to
                 # this section, it means that i've reached the end
                 if layer_class not in linked_layers and i.name not in linked_layers:
@@ -102,7 +101,7 @@ class DNET:
                 for _ in range(n_section):
                     fc_section += self.add_names(new_section)
 
-                # add all the layers of the dense section to the final architecture
+                # add all the layers of the section to the final architecture
                 for x in fc_section:
                     section |= {x.name : [reused_weights, {'class_name' : x.__class__.__name__}, x.get_config()]}
 
@@ -206,10 +205,13 @@ class DNET:
         for layer in layer_list:
             layer_class = layer.__class__.__name__
 
+            print(type_class, layer_class)
+
             # if the class searched is the current layer class and
             # i haven't found yet the beginning of the section
             if type_class in layer_class and not type_flag:
                 type_flag = True
+                type_name = layer.name
             elif type_flag and type_class not in layer_class:
                 # otherwise, if i'm in the section and the current layer type doesn't match,
                 # stop the search, because i reached the end of the section
@@ -224,7 +226,7 @@ class DNET:
         """
         method used to check if all elements of a list are layers
         """
-        return all(['keras.layers' in str(type(i)) for i in new_section])
+        return all(['keras.layers' in str(type(i)) for i in layer_list])
   
 if __name__ == '__main__':
 
@@ -237,7 +239,7 @@ if __name__ == '__main__':
 
     # replace all MaxPool layers with BatchNorm and AveragePool
     new_section = [BatchNormalization(), AveragePooling2D((2,2))]
-    model = dynamicNet.insert_section(model, 1, new_section, 'replace', 'MaxPooling2D')
+    model = dynamicNet.insert_section(model, 2, new_section, 'replace', 'MaxPooling2D')
     model.summary()
 
     # remove all Dense layers
