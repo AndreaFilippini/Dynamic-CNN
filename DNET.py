@@ -205,8 +205,6 @@ class DNET:
         for layer in layer_list:
             layer_class = layer.__class__.__name__
 
-            print(type_class, layer_class)
-
             # if the class searched is the current layer class and
             # i haven't found yet the beginning of the section
             if type_class in layer_class and not type_flag:
@@ -239,7 +237,7 @@ if __name__ == '__main__':
 
     # replace all MaxPool layers with BatchNorm and AveragePool
     new_section = [BatchNormalization(), AveragePooling2D((2,2))]
-    model = dynamicNet.insert_section(model, 2, new_section, 'replace', 'MaxPooling2D')
+    model = dynamicNet.insert_section(model, 1, new_section, 'replace', 'MaxPooling2D')
     model.summary()
 
     # remove all Dense layers
