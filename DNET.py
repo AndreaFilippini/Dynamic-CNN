@@ -69,11 +69,6 @@ class DNET:
         method used for inserting a new section of layers
         """
 
-        # boolean used to determine if after insertion, i can use the old weights for all layers in the network,
-        # checking that all new layers don't need weights in the architecture
-        no_weights = ['MaxPooling2D', 'AveragePooling2D', 'GlobalAveragePooling2D']
-        reused = all([(i.__class__.__name__ in no_weights) for i in new_section])
-
         # boolean used to identify which layers in the new architecture can use the old weights
         reused_weights = True
 
@@ -93,7 +88,7 @@ class DNET:
             
             # if the target matches the searched class or the searched layer name:
             if (target in layer_class or target in i.name):
-                reused_weights = reused
+                reused_weights = False
                 replace_flag = True
 
                 # list containing the layers the new section
@@ -235,7 +230,7 @@ if __name__ == '__main__':
     model.summary()
 
     # add a new convolutional section before the last one
-    new_section = [Conv2D(1024, (2,2), padding="same"), Conv2D(1024, (2,2), padding="same"), MaxPooling2D()]
+    new_section = [Conv2D(1024, (2,2)), Conv2D(1024, (2,2)), MaxPooling2D()]
     last_conv = dynamicNet.get_last_section(model, 'Conv2D')
     model = dynamicNet.insert_section(model, 1, new_section, 'before', last_conv)
     model.summary()
