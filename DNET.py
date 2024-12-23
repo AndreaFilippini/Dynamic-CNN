@@ -27,11 +27,8 @@ class DNET:
         # initialize the name of layers to be removed as an empty string
         removed_name = ""
 
-        # get the layers of neural network
-        layers_list = model.layers
-
         # iterate over each layer
-        for i in layers_list:
+        for i in model.layers:
   
             # get the name of the current layer class from which it's derived
             layer_class = i.__class__.__name__
@@ -78,11 +75,8 @@ class DNET:
         # initialize dict containing the neural network layers after addition as empty
         net_dense = {}
 
-        # get the layers of neural network
-        layers_list = model.layers
-
         # iterate over each layer
-        for i in layers_list:
+        for i in model.layers:
             # get the name of the current layer class from which it's derived
             layer_class = i.__class__.__name__
 
